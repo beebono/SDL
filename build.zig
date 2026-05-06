@@ -86,6 +86,9 @@ pub fn build(b: *std.Build) void {
 
             mod.addIncludePath(.{ .cwd_relative = cache_include });
         },
+        .linux => {
+            mod.addCSourceFiles(.{ .files = &linux_src_files });
+        },
         else => {
             if (t.abi.isAndroid()) {
                 mod.addCSourceFiles(.{
