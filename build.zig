@@ -142,6 +142,7 @@ pub fn build(b: *std.Build) void {
         const config_header = configHeader(b, t);
         mod.addConfigHeader(config_header);
         lib.installHeader(config_header.getOutputFile(), "SDL2/SDL_config.h");
+        lib.installHeader(config_header.getOutputFile(), "SDL_config.h");
 
         const revision_header = b.addConfigHeader(.{
             .style = .{ .cmake = b.path("include/SDL_revision.h.cmake") },
@@ -152,6 +153,7 @@ pub fn build(b: *std.Build) void {
         });
         mod.addConfigHeader(revision_header);
         lib.installHeader(revision_header.getOutputFile(), "SDL2/SDL_revision.h");
+        lib.installHeader(revision_header.getOutputFile(), "SDL_revision.h");
     }
 
     const use_hidapi = b.option(bool, "use_hidapi", "Use hidapi shared library") orelse t.abi.isAndroid();
@@ -183,6 +185,7 @@ pub fn build(b: *std.Build) void {
     }
 
     lib.installHeadersDirectory(b.path("include"), "SDL2", .{});
+    lib.installHeadersDirectory(b.path("include"), "", .{});
     b.installArtifact(lib);
 }
 
