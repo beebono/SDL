@@ -502,7 +502,7 @@ const linux_src_files = [_][]const u8{
     "src/render/opengles2/SDL_shaders_gles2.c",
 
     "src/audio/pulseaudio/SDL_pulseaudio.c",
-    "src/audio/pulseaudio/SDL_alsa_audio.c",
+    "src/audio/alsa/SDL_alsa_audio.c",
 };
 
 const darwin_src_files = [_][]const u8{
