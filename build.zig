@@ -141,25 +141,6 @@ pub fn build(b: *std.Build) void {
         mod.addCMacro("USING_GENERATED_CONFIG_H", "");
 
         const config_header = configHeader(b, t);
-        switch (t.os.tag) {
-            .linux => {
-                mod.addCSourceFiles(.{ .files = &linux_src_files });
-                config_header.addValues(.{
-                    .SDL_VIDEO_OPENGL = 1,
-                    .SDL_VIDEO_OPENGL_ES = 1,
-                    .SDL_VIDEO_OPENGL_ES2 = 1,
-                    .SDL_VIDEO_OPENGL_BGL = 1,
-                    .SDL_VIDEO_OPENGL_CGL = 1,
-                    .SDL_VIDEO_OPENGL_GLX = 1,
-                    .SDL_VIDEO_OPENGL_WGL = 1,
-                    .SDL_VIDEO_OPENGL_EGL = 1,
-                    .SDL_VIDEO_OPENGL_OSMESA = 1,
-                    .SDL_VIDEO_OPENGL_OSMESA_DYNAMIC = 1,
-                });
-                applyOptions(b, mod, config_header, &linux_options);
-            },
-            else => {},
-        }
         mod.addConfigHeader(config_header);
         lib.installHeader(config_header.getOutputFile(), "SDL2/SDL_config.h");
 
@@ -941,91 +922,6 @@ const render_driver_sw = SdlOption{
     },
     .system_libs = &.{},
 };
-const linux_options = [_]SdlOption{
-    render_driver_sw,
-    .{
-        .name = "video_driver_x11",
-        .desc = "enable the x11 video driver",
-        .default = true,
-        .sdl_configs = &.{
-            "SDL_VIDEO_DRIVER_X11",
-            "SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS",
-        },
-        .src_files = &.{},
-        .system_libs = &.{},
-    },
-    .{
-        .name = "render_driver_ogl",
-        .desc = "enable the opengl render driver",
-        .default = false,
-        .sdl_configs = &.{"SDL_VIDEO_RENDER_OGL"},
-        .src_files = &.{
-            "src/render/opengl/SDL_render_gl.c",
-            "src/render/opengl/SDL_shaders_gl.c",
-        },
-        .system_libs = &.{},
-    },
-    .{
-        .name = "render_driver_ogl_es",
-        .desc = "enable the opengl es render driver",
-        .default = false,
-        .sdl_configs = &.{"SDL_VIDEO_RENDER_OGL_ES"},
-        .src_files = &.{
-            "src/render/opengles/SDL_render_gles.c",
-        },
-        .system_libs = &.{},
-    },
-    .{
-        .name = "render_driver_ogl_es2",
-        .desc = "enable the opengl es2 render driver",
-        .default = true,
-        .sdl_configs = &.{"SDL_VIDEO_RENDER_OGL_ES2"},
-        .src_files = &.{
-            "src/render/opengles2/SDL_render_gles2.c",
-            "src/render/opengles2/SDL_shaders_gles2.c",
-        },
-        .system_libs = &.{},
-    },
-    .{
-        .name = "audio_driver_pulse",
-        .desc = "enable the pulse audio driver",
-        .default = true,
-        .sdl_configs = &.{"SDL_AUDIO_DRIVER_PULSEAUDIO"},
-        .src_files = &.{"src/audio/pulseaudio/SDL_pulseaudio.c"},
-        .system_libs = &.{},
-    },
-    .{
-        .name = "audio_driver_alsa",
-        .desc = "enable the alsa audio driver",
-        .default = true,
-        .sdl_configs = &.{"SDL_AUDIO_DRIVER_ALSA"},
-        .src_files = &.{"src/audio/alsa/SDL_alsa_audio.c"},
-        .system_libs = &.{},
-    },
-};
-
-fn applyOptions(
-    b: *std.Build,
-    mod: *std.Build.Module,
-    config_header: *std.Build.Step.ConfigHeader,
-    comptime options: []const SdlOption,
-) void {
-    inline for (options) |option| {
-        const enabled = if (b.option(bool, option.name, option.desc)) |o| o else option.default;
-        for (option.c_macros) |name| {
-            mod.addCMacro(name, if (enabled) "1" else "0");
-        }
-        for (option.sdl_configs) |config| {
-            config_header.addValue(config, u1, @intFromBool(enabled));
-        }
-        if (enabled) {
-            mod.addCSourceFiles(.{ .files = option.src_files });
-            for (option.system_libs) |lib_name| {
-                mod.linkSystemLibrary(lib_name, .{});
-            }
-        }
-    }
-}
 
 fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
     const is_linux = t.os.tag == .linux;
