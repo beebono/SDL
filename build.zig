@@ -135,7 +135,6 @@ pub fn build(b: *std.Build) void {
     if (use_pregenerated_config) {
         mod.addIncludePath(b.path("include-pregen"));
         lib.installHeadersDirectory(b.path("include-pregen"), "SDL2", .{});
-        mod.addCSourceFiles(.{ .files = render_driver_sw.src_files });
     } else {
         // causes pregenerated SDL_config.h to assert an error
         mod.addCMacro("USING_GENERATED_CONFIG_H", "");
@@ -443,8 +442,15 @@ const linux_src_files = [_][]const u8{
     "src/thread/pthread/SDL_syssem.c",
     "src/thread/pthread/SDL_systhread.c",
     "src/thread/pthread/SDL_systls.c",
+    "src/thread/pthread/SDL_syscond.c",
 
     "src/timer/unix/SDL_systimer.c",
+
+    "src/video/kmsdrm/SDL_kmsdrmdyn.c",
+    "src/video/kmsdrm/SDL_kmsdrmevents.c",
+    "src/video/kmsdrm/SDL_kmsdrmmouse.c",
+    "src/video/kmsdrm/SDL_kmsdrmopengles.c",
+    "src/video/kmsdrm/SDL_kmsdrmvideo.c",
 
     "src/video/x11/SDL_x11clipboard.c",
     "src/video/x11/SDL_x11dyn.c",
@@ -464,6 +470,33 @@ const linux_src_files = [_][]const u8{
     "src/video/x11/SDL_x11xfixes.c",
     "src/video/x11/SDL_x11xinput2.c",
     "src/video/x11/edid-parse.c",
+
+    "src/video/wayland/SDL_waylandclipboard.c",
+    "src/video/wayland/SDL_waylanddatamanager.c",
+    "src/video/wayland/SDL_waylanddyn.c",
+    "src/video/wayland/SDL_waylandevents.c",
+    "src/video/wayland/SDL_waylandkeyboard.c",
+    "src/video/wayland/SDL_waylandmessagebox.c",
+    "src/video/wayland/SDL_waylandmouse.c",
+    "src/video/wayland/SDL_waylandopengles.c",
+    "src/video/wayland/SDL_waylandshmbuffer.c",
+    "src/video/wayland/SDL_waylandvideo.c",
+    "src/video/wayland/SDL_waylandwindow.c",
+
+    "src/render/software/SDL_blendfillrect.c",
+    "src/render/software/SDL_blendline.c",
+    "src/render/software/SDL_blendpoint.c",
+    "src/render/software/SDL_drawline.c",
+    "src/render/software/SDL_drawpoint.c",
+    "src/render/software/SDL_render_sw.c",
+    "src/render/software/SDL_rotate.c",
+    "src/render/software/SDL_triangle.c",
+
+    "src/render/opengles2/SDL_render_gles2.c",
+    "src/render/opengles2/SDL_shaders_gles2.c",
+
+    "src/audio/pulseaudio/SDL_pulseaudio.c",
+    "src/audio/pulseaudio/SDL_alsa_audio.c",
 };
 
 const darwin_src_files = [_][]const u8{
@@ -798,131 +831,6 @@ const unknown_src_files = [_][]const u8{
     "src/render/vitagxm/SDL_render_vita_gxm_tools.c",
 };
 
-const static_headers = [_][]const u8{
-    "begin_code.h",
-    "close_code.h",
-    "SDL_assert.h",
-    "SDL_atomic.h",
-    "SDL_audio.h",
-    "SDL_bits.h",
-    "SDL_blendmode.h",
-    "SDL_clipboard.h",
-    "SDL_config_android.h",
-    "SDL_config_emscripten.h",
-    "SDL_config_iphoneos.h",
-    "SDL_config_macosx.h",
-    "SDL_config_minimal.h",
-    "SDL_config_ngage.h",
-    "SDL_config_os2.h",
-    "SDL_config_pandora.h",
-    "SDL_config_windows.h",
-    "SDL_config_wingdk.h",
-    "SDL_config_winrt.h",
-    "SDL_config_xbox.h",
-    "SDL_copying.h",
-    "SDL_cpuinfo.h",
-    "SDL_egl.h",
-    "SDL_endian.h",
-    "SDL_error.h",
-    "SDL_events.h",
-    "SDL_filesystem.h",
-    "SDL_gamecontroller.h",
-    "SDL_gesture.h",
-    "SDL_guid.h",
-    "SDL.h",
-    "SDL_haptic.h",
-    "SDL_hidapi.h",
-    "SDL_hints.h",
-    "SDL_joystick.h",
-    "SDL_keyboard.h",
-    "SDL_keycode.h",
-    "SDL_loadso.h",
-    "SDL_locale.h",
-    "SDL_log.h",
-    "SDL_main.h",
-    "SDL_messagebox.h",
-    "SDL_metal.h",
-    "SDL_misc.h",
-    "SDL_mouse.h",
-    "SDL_mutex.h",
-    "SDL_name.h",
-    "SDL_opengles2_gl2ext.h",
-    "SDL_opengles2_gl2.h",
-    "SDL_opengles2_gl2platform.h",
-    "SDL_opengles2.h",
-    "SDL_opengles2_khrplatform.h",
-    "SDL_opengles.h",
-    "SDL_opengl_glext.h",
-    "SDL_opengl.h",
-    "SDL_pixels.h",
-    "SDL_platform.h",
-    "SDL_power.h",
-    "SDL_quit.h",
-    "SDL_rect.h",
-    "SDL_render.h",
-    "SDL_rwops.h",
-    "SDL_scancode.h",
-    "SDL_sensor.h",
-    "SDL_shape.h",
-    "SDL_stdinc.h",
-    "SDL_surface.h",
-    "SDL_system.h",
-    "SDL_syswm.h",
-    "SDL_test_assert.h",
-    "SDL_test_common.h",
-    "SDL_test_compare.h",
-    "SDL_test_crc32.h",
-    "SDL_test_font.h",
-    "SDL_test_fuzzer.h",
-    "SDL_test.h",
-    "SDL_test_harness.h",
-    "SDL_test_images.h",
-    "SDL_test_log.h",
-    "SDL_test_md5.h",
-    "SDL_test_memory.h",
-    "SDL_test_random.h",
-    "SDL_thread.h",
-    "SDL_timer.h",
-    "SDL_touch.h",
-    "SDL_types.h",
-    "SDL_version.h",
-    "SDL_video.h",
-    "SDL_vulkan.h",
-};
-
-const SdlOption = struct {
-    name: []const u8,
-    desc: []const u8,
-    default: bool,
-    // SDL configs affect the public SDL_config.h header file. Any values
-    // should occur in a header file in the include directory.
-    sdl_configs: []const []const u8,
-    // C Macros are similar to SDL configs but aren't present in the public
-    // headers and only affect the SDL implementation.  None of the values
-    // should occur in the include directory.
-    c_macros: []const []const u8 = &.{},
-    src_files: []const []const u8,
-    system_libs: []const []const u8,
-};
-const render_driver_sw = SdlOption{
-    .name = "render_driver_software",
-    .desc = "enable the software render driver",
-    .default = true,
-    .sdl_configs = &.{},
-    .c_macros = &.{"SDL_VIDEO_RENDER_SW"},
-    .src_files = &.{
-        "src/render/software/SDL_blendfillrect.c",
-        "src/render/software/SDL_blendline.c",
-        "src/render/software/SDL_blendpoint.c",
-        "src/render/software/SDL_drawline.c",
-        "src/render/software/SDL_drawpoint.c",
-        "src/render/software/SDL_render_sw.c",
-        "src/render/software/SDL_rotate.c",
-        "src/render/software/SDL_triangle.c",
-    },
-    .system_libs = &.{},
-};
-
 fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
     const is_linux = t.os.tag == .linux;
     const is_unix = t.os.tag != .windows;
@@ -1226,7 +1134,7 @@ fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
         .SDL_JOYSTICK_OS2 = 0,
         .SDL_JOYSTICK_USBHID = 0,
         .SDL_HAVE_MACHINE_JOYSTICK_H = 0,
-        .SDL_JOYSTICK_HIDAPI = 0,
+        .SDL_JOYSTICK_HIDAPI = 1,
         .SDL_JOYSTICK_RAWINPUT = 0,
         .SDL_JOYSTICK_EMSCRIPTEN = 0,
         .SDL_JOYSTICK_VIRTUAL = 0,
@@ -1335,6 +1243,7 @@ fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
         .SDL_VIDEO_DRIVER_VITA = 0,
         .SDL_VIDEO_DRIVER_N3DS = 0,
 
+        .SDL_VIDEO_RENDER_SW = 1,
         .SDL_VIDEO_RENDER_D3D = 0,
         .SDL_VIDEO_RENDER_D3D11 = 0,
         .SDL_VIDEO_RENDER_D3D12 = 0,
