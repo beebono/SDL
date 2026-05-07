@@ -18,10 +18,15 @@ pub fn build(b: *std.Build) void {
     });
 
     const sdl_include_path = b.path("include");
-    mod.addCSourceFiles(.{ .files = &generic_src_files });
+    mod.addCSourceFiles(.{
+        .files = &generic_src_files,
+        .flags = &.{"-D_GNU_SOURCE"},
+    });
     mod.addCMacro("SDL_USE_BUILTIN_OPENGL_DEFINITIONS", "1");
     mod.addCMacro("HAVE_GCC_ATOMICS", "1");
     mod.addCMacro("HAVE_GCC_SYNC_LOCK_TEST_AND_SET", "1");
+    var wayland_generated_headers = std.ArrayList(struct { lp: std.Build.LazyPath, name: []const u8 }).empty;
+    defer wayland_generated_headers.deinit(b.allocator);
 
     switch (t.os.tag) {
         .windows => {
@@ -87,7 +92,49 @@ pub fn build(b: *std.Build) void {
             mod.addIncludePath(.{ .cwd_relative = cache_include });
         },
         .linux => {
-            mod.addCSourceFiles(.{ .files = &linux_src_files });
+            mod.addCSourceFiles(.{
+                .files = &linux_src_files,
+                .flags = &.{"-D_GNU_SOURCE"},
+            });
+            const wayland_protocols = [_][]const u8{
+                "wayland-protocols/cursor-shape-v1.xml",
+                "wayland-protocols/fractional-scale-v1.xml",
+                "wayland-protocols/idle-inhibit-unstable-v1.xml",
+                "wayland-protocols/keyboard-shortcuts-inhibit-unstable-v1.xml",
+                "wayland-protocols/pointer-constraints-unstable-v1.xml",
+                "wayland-protocols/primary-selection-unstable-v1.xml",
+                "wayland-protocols/relative-pointer-unstable-v1.xml",
+                "wayland-protocols/tablet-unstable-v2.xml",
+                "wayland-protocols/text-input-unstable-v3.xml",
+                "wayland-protocols/viewporter.xml",
+                "wayland-protocols/wayland.xml",
+                "wayland-protocols/xdg-activation-v1.xml",
+                "wayland-protocols/xdg-decoration-unstable-v1.xml",
+                "wayland-protocols/xdg-output-unstable-v1.xml",
+                "wayland-protocols/xdg-shell.xml",
+                "wayland-protocols/xdg-toplevel-icon-v1.xml",
+            };
+            for (wayland_protocols) |xml_rel| {
+                const xml = b.path(xml_rel);
+                const stem = std.fs.path.stem(xml_rel);
+
+                const header_name = b.fmt("{s}-client-protocol.h", .{stem});
+                const gen_header = b.addSystemCommand(&.{ "wayland-scanner", "client-header" });
+                gen_header.addFileArg(xml);
+                const header_file = gen_header.addOutputFileArg(header_name);
+
+                const code_name = b.fmt("{s}-protocol.c", .{stem});
+                const gen_code = b.addSystemCommand(&.{ "wayland-scanner", "private-code" });
+                gen_code.addFileArg(xml);
+                const code_file = gen_code.addOutputFileArg(code_name);
+
+                mod.addIncludePath(header_file.dirname());
+                mod.addCSourceFile(.{
+                    .file = code_file,
+                    .flags = &.{"-D_GNU_SOURCE"},
+                });
+                wayland_generated_headers.append(b.allocator, .{ .lp = header_file, .name = header_name }) catch {};
+            }
         },
         else => {
             if (t.abi.isAndroid()) {
@@ -189,6 +236,10 @@ pub fn build(b: *std.Build) void {
 
     lib.installHeadersDirectory(b.path("include"), "SDL2", .{});
     lib.installHeadersDirectory(b.path("include"), "", .{});
+    for (wayland_generated_headers.items) |h| {
+        lib.installHeader(h.lp, b.fmt("SDL2/{s}", .{h.name}));
+        lib.installHeader(h.lp, h.name);
+    }
     b.installArtifact(lib);
 }
 
