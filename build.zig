@@ -1307,7 +1307,7 @@ fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
         .SDL_VIDEO_RENDER_D3D12 = 0,
         .SDL_VIDEO_RENDER_OGL = 0,
         .SDL_VIDEO_RENDER_OGL_ES = 0,
-        .SDL_VIDEO_RENDER_OGL_ES2 = 0,
+        .SDL_VIDEO_RENDER_OGL_ES2 = 1,
         .SDL_VIDEO_RENDER_DIRECTFB = 0,
         .SDL_VIDEO_RENDER_METAL = 0,
         .SDL_VIDEO_RENDER_VITA_GXM = 0,
