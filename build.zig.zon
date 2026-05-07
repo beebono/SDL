@@ -13,5 +13,6 @@
         "include-pregen",
         "src",
         "android-project",
+        "wayland-protocols",
     },
 }
