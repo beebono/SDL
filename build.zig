@@ -941,6 +941,7 @@ fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
         .HAVE_REALLOC = 1,
         .HAVE_FREE = 1,
         .HAVE_ALLOCA = 1,
+        .HAVE_SIGTIMEDWAIT = 1,
 
         // Don't use C runtime versions of these on Windows
         .HAVE_GETENV = 1,
@@ -1295,7 +1296,7 @@ fn configHeader(b: *std.Build, t: std.Target) *std.Build.Step.ConfigHeader {
         .SDL_VIDEO_DRIVER_X11_XRANDR = 0,
         .SDL_VIDEO_DRIVER_X11_XSCRNSAVER = 0,
         .SDL_VIDEO_DRIVER_X11_XSHAPE = 0,
-        .SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS = 0,
+        .SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS = 1,
         .SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM = 0,
         .SDL_VIDEO_DRIVER_VITA = 0,
         .SDL_VIDEO_DRIVER_N3DS = 0,
