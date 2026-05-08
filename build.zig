@@ -485,6 +485,10 @@ const linux_src_files = [_][]const u8{
     "src/core/linux/SDL_threadprio.c",
     "src/core/unix/SDL_poll.c",
 
+    "src/locale/unix/SDL_syslocale.c",
+
+    "src/power/linux/SDL_syspower.c",
+
     "src/filesystem/unix/SDL_sysfilesystem.c",
 
     "src/haptic/linux/SDL_syshaptic.c",
