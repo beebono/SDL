@@ -11,8 +11,8 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
     const lib = b.addLibrary(.{
-        .name = "SDL2",
-        .version = .{ .major = 2, .minor = 32, .patch = 10 },
+        .name = "SDL2-2.0",
+        .version = .{ .major = 0, .minor = 3200, .patch = 8 },
         .linkage = .dynamic,
         .root_module = mod,
     });
