@@ -13,7 +13,7 @@ pub fn build(b: *std.Build) void {
     const lib = b.addLibrary(.{
         .name = "SDL2",
         .version = .{ .major = 2, .minor = 32, .patch = 10 },
-        .linkage = if (t.abi.isAndroid()) .dynamic else .static,
+        .linkage = .dynamic,
         .root_module = mod,
     });
 
